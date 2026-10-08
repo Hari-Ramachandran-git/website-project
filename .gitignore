@@ -1,0 +1,15 @@
+node_modules/
+frontend/dist/
+backend/bin/
+backend/obj/
+backend/Data/orders.json
+backend/Data/subscriptions.json
+backend/Data/*.tmp
+artifacts/
+.env
+.env.*
+.DS_Store
+frontend/test-results/
+frontend/playwright-report/
+
+.vercel/

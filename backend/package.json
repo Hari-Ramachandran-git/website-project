@@ -1,0 +1,8 @@
+{
+  "name": "om-muruga-api-runner",
+  "private": true,
+  "scripts": {
+    "start": "sh ../scripts/start-api.sh",
+    "test": "node ../scripts/verify-api.mjs"
+  }
+}

@@ -1,0 +1,8 @@
+# Demo photography
+
+These local PNG assets were generated with the built-in image generation tool for this demo, inspired by the user's heritage saree references. They depict illustrative clothing rather than inventory photography.
+
+- `hero.png`: Luxury South Indian saree store hero photo, wide landscape. Elegant adult Indian woman in rich burgundy Kanchipuram silk saree with ornate gold zari border and traditional gold earrings beside a carved warm sandstone palace arch. Model on right half, head to thigh, looking slightly left; left half a warm beige wall with negative space for typography. Natural warm sunlight, realistic fashion editorial. Burgundy, antique gold, ivory. No text, logo or watermark.
+- `emerald.png`: Full-length studio fashion catalogue photograph of an adult Indian woman in a deep emerald green silk saree with a wide antique gold zari border and traditional earrings. Warm beige textured studio wall, relaxed pose, complete drape visible, natural warm light. Portrait. No text, logo or watermark.
+- `rose.png`: Full-length studio fashion catalogue photograph of an adult Indian woman in a dusty rose pink Banarasi silk saree with fine gold woven floral motifs, a rich gold border and traditional earrings. Warm beige textured studio wall, relaxed pose, complete drape visible, natural warm light. Portrait. No text, logo or watermark.
+- `gold.png`: Full-length studio fashion catalogue photograph of an adult Indian woman in a golden ochre silk saree with a deep burgundy woven border and traditional earrings. Warm beige textured studio wall, relaxed pose, complete drape visible, natural warm light. Portrait. No text, logo or watermark.

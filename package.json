@@ -1,0 +1,13 @@
+{
+  "name": "om-muruga-sarees-repo",
+  "private": true,
+  "scripts": {
+    "install:frontend": "npm --prefix frontend install",
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix frontend test",
+    "api": "dotnet run --project backend",
+    "preview:standalone": "npm run build && node scripts/create-preview.mjs",
+    "start": "npm --prefix frontend run start"
+  }
+}

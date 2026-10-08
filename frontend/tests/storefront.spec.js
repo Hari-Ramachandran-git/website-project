@@ -1,0 +1,82 @@
+import {test,expect} from '@playwright/test';
+test('catalogue, wishlist and cart remain usable after a reload',async({page})=>{
+ await page.goto('/');
+ await expect(page.getByRole('heading',{name:'Threads of tradition. Stories of you.'})).toBeVisible();
+ await page.getByRole('button',{name:'Save The Kumkum Silk to wishlist'}).click();
+ await page.getByRole('link',{name:'View The Kumkum Silk'}).click();
+ await expect(page).toHaveURL(/sarees\/1\/the-kumkum-silk/);
+ await page.locator('.saree-actions').getByRole('button',{name:'ADD TO BAG',exact:true}).click();
+ await page.reload();
+ await page.getByRole('button',{name:'Shopping bag, 1 items'}).click();
+ await expect(page.getByRole('dialog').getByRole('heading',{name:'The Kumkum Silk'})).toBeVisible();
+ await page.getByRole('button',{name:'Increase The Kumkum Silk quantity'}).click();
+ await expect(page.getByRole('dialog').getByText('₹12,980').first()).toBeVisible();
+ await page.getByRole('button',{name:'Remove The Kumkum Silk from bag'}).click();
+ await expect(page.getByRole('heading',{name:'Your next favourite is waiting.'})).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+test('search gives a clear empty state',async({page})=>{
+ await page.goto('/');
+ await page.getByRole('button',{name:'Search sarees'}).click();
+ await page.getByRole('textbox',{name:'Search catalogue'}).fill('no-matching-saree');
+ await expect(page.getByRole('heading',{name:'No matches just yet.'})).toBeVisible();
+ await page.getByRole('button',{name:'Clear search',exact:true}).click();
+ await expect(page.getByRole('dialog').getByRole('heading',{name:'The Kumkum Silk'})).toBeVisible();
+});
+
+test('search suggestions lead to a product, and bag removal can be undone',async({page})=>{
+ await page.goto('/');
+ await page.getByRole('button',{name:'Search sarees'}).click();
+ await page.getByRole('textbox',{name:'Search catalogue'}).fill('emerald');
+ const searchDialog=page.getByRole('dialog');
+ await expect(searchDialog.getByText('2 matches for “emerald”')).toBeVisible();
+ await searchDialog.getByRole('link').filter({hasText:'Emerald Evening'}).click();
+ await expect(page).toHaveURL(/sarees\/6\/emerald-evening/);
+ await page.locator('.saree-actions').getByRole('button',{name:'ADD TO BAG',exact:true}).click();
+ await page.getByRole('button',{name:'View bag',exact:true}).click();
+ await page.getByRole('button',{name:'Remove Emerald Evening from bag'}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Undo',exact:true}).click();
+ await expect(page.getByRole('dialog').getByRole('heading',{name:'Emerald Evening'})).toBeVisible();
+});
+test('mobile filters are staged until applied and reset retains search',async({page},testInfo)=>{
+ test.skip(testInfo.project.name!=='mobile','Mobile bottom sheet');
+ await page.goto('/sarees?search=silk');
+ await page.getByRole('button',{name:'Filters',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'Filter sarees'});
+ await dialog.getByRole('radio',{name:'Emerald',exact:true}).check();
+ await expect(page).toHaveURL(/search=silk$/);
+ await expect(dialog.getByRole('button',{name:'SHOW 2 SAREES'})).toBeVisible();
+ await dialog.getByRole('button',{name:'Reset filters'}).click();
+ await expect(dialog.getByRole('button',{name:'SHOW 6 SAREES'})).toBeVisible();
+ await dialog.getByRole('radio',{name:'Emerald',exact:true}).check();
+ await dialog.getByRole('button',{name:'SHOW 2 SAREES'}).click();
+ await expect(page).toHaveURL(/color=Emerald/);
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('mock checkout and newsletter succeed without requesting an API',async({page})=>{
+ const apiRequests=[];
+ await page.route('**/api/**',route=>{apiRequests.push(route.request().url());return route.abort();});
+ await page.goto('/sarees/6/emerald-evening');
+ await page.locator('.saree-actions').getByRole('button',{name:'ADD TO BAG',exact:true}).click();
+ await page.getByRole('button',{name:'View bag',exact:true}).click();
+ await page.getByRole('button',{name:'PROCEED TO DEMO CHECKOUT'}).click();
+ const checkout=page.getByRole('dialog');
+ await checkout.getByLabel('Full name').fill('Demo Customer');
+ await checkout.getByLabel('Email address',{exact:true}).fill('demo@example.com');
+ await checkout.getByLabel('Phone number').fill('9876543210');
+ await checkout.getByLabel('Delivery address').fill('123 Sample Street');
+ await checkout.getByLabel('City',{exact:true}).fill('Chennai');
+ await checkout.getByLabel('PIN code').fill('600001');
+ await checkout.getByRole('button',{name:'PLACE DEMO ORDER'}).click();
+ await expect(checkout.getByRole('heading',{name:'Your demo order is confirmed.'})).toBeVisible();
+ await expect(checkout.getByText('Total: ₹3,490')).toBeVisible();
+ const receipt=await page.evaluate(()=>JSON.parse(localStorage.getItem('oms-last-demo-order')));
+ expect(receipt.total).toBe(3490);expect(receipt.customer).toBeUndefined();
+ await checkout.getByRole('button',{name:'CONTINUE EXPLORING'}).click();
+ await page.getByLabel('Your email address',{exact:true}).fill('demo@example.com');
+ await page.getByRole('button',{name:'Subscribe to newsletter'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Demo signup complete. No emails will be sent.'})).toBeVisible();
+ expect(apiRequests).toEqual([]);
+});

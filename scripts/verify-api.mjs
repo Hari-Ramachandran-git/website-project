@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+const base='http://localhost:5080';
+let response=await fetch(`${base}/api/health`);assert.equal(response.status,200);
+response=await fetch(`${base}/api/products`);const products=await response.json();assert.equal(products.length,6);
+response=await fetch(`${base}/api/products/999`);assert.equal(response.status,404);
+const customer={name:'Demo Test',email:'demo-test@example.com',phone:'9876543210',address:'123 Sample Street',city:'Chennai',postalCode:'600001'};
+const post=payload=>fetch(`${base}/api/orders`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+response=await post({customer,items:[{id:1,quantity:99}]});assert.equal(response.status,400);
+response=await post({customer,items:[{id:1,quantity:1},{id:1,quantity:1}]});assert.equal(response.status,400);
+response=await post({customer:{...customer,postalCode:'123'},items:[{id:1,quantity:1}]});assert.equal(response.status,400);
+response=await post({customer,items:[{id:999,quantity:1}]});assert.equal(response.status,400);
+response=await post({customer,items:[{id:1,quantity:1,price:1}]});assert.equal(response.status,201);const receipt=await response.json();assert.equal(receipt.total,6490);assert.equal(receipt.shipping,0);assert.equal(receipt.demo,true);
+console.log('PASS: optional .NET API catalogue, validation, server-derived price and persisted demo order.');
